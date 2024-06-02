@@ -8,6 +8,8 @@ os.environ["OPENAI_BASE_URL"] = "https://api.xiaoai.plus/v1"
 
 client = OpenAI()
 
+print("Start Running")
+
 card_set = ["Fool", "Magician", "High Priestess", "Empress", "Emperor", "Hierophant", "Lovers", "Chariot", "Chariot", "Chariot", "Hermit", "Wheel of Fortune", "Justice", "Hanged Man", "Death", "Temperance", "Devil", "Tower", "Star", "Moon", "Sun", "Judgment", "World", 
             "Ace of Wands", "Two of Wands", "Three of Wands", "Four of Wands", "Five of Wands", "Six of Wands", "Seven of Wands", "Eight of Wands", "Nine of Wands", "Ten of Wands", 
             "Page of Wands", "Queen of Wands", "King of Wands", 
@@ -36,4 +38,4 @@ completion = client.chat.completions.create(
 )
 
 print(completion.choices[0].message)
-
+input("Press any key to exit.")
