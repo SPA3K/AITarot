@@ -1,1 +1,2 @@
-Flask
+Flask==3.0.3
+openai==1.33.0
