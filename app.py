@@ -6,9 +6,9 @@ import os
 import re
 import random
 
-# os.environ["OPENAI_API_KEY"] = "sk-proj-uKz845rWEhZjPjFs55WUT3BlbkFJsX1pkp7s9LL9Uz00qj44"   # kehan key
-os.environ["OPENAI_API_KEY"] = "sk-VbBK9ARkkhKG25Io2783Bd26Ed404788Ad6cC25559E7C005"          # no proxy key
-os.environ["OPENAI_BASE_URL"] = "https://api.xiaoai.plus/v1"
+os.environ["OPENAI_API_KEY"] = "sk-proj-uKz845rWEhZjPjFs55WUT3BlbkFJsX1pkp7s9LL9Uz00qj44"   # kehan key
+# os.environ["OPENAI_API_KEY"] = "sk-VbBK9ARkkhKG25Io2783Bd26Ed404788Ad6cC25559E7C005"          # no proxy key
+# os.environ["OPENAI_BASE_URL"] = "https://api.xiaoai.plus/v1"
 os.environ["BACKEND_URL"] = "https://aitarot.azurewebsites.net/"
 
 load_dotenv()
@@ -35,7 +35,7 @@ card_status = ["positive", "negative"]
 def generate_draft_story_message(aspect_data, input_str):
     history = []
     messages = [
-        {"role": "system", "content": "You're a tarot card prognosticator, and you need to give a 500-word or so prediction of the future through my next hand input, and the consulter usually comes with frustration, and your answers need to sell anxiety. Translate all to Chinese."},
+        {"role": "system", "content": "You're a tarot card prognosticator, and you need to give a 300-word or so prediction of the future through my next hand input, and the consulter usually comes with frustration, and your answers need to sell anxiety. Translate all to Chinese."},
         {"role": "user", "content": f"In the aspect of {aspect_data}, cards are {input_str}"}
     ]
     history.append(messages[0])
@@ -109,6 +109,70 @@ def get_options():
         options_list = [opt.strip('" ') for opt in json_pattern[0].split(',')] 
         print(options_list)
         return jsonify({'options': options_list})
+    except Exception as e:
+        print(f"General error: {e}")
+        return jsonify({'error': f"General error: {e}"}), 500
+
+
+def generate_puzzle(story, history):
+    messages = history.copy()
+    messages.append({"role": "assistant", "content": f"tarot predict is above"})
+    messages.append(
+        {"role": "user", "content": f"Find five information user might ask according to the tarot predict. Return them in the following format without numerical numbering [\"sentence\",\"sentence\",\"sentence\",\"sentence\",\"sentence\"]"}
+    )
+    print(messages)
+    history = messages.copy()
+    return messages, history
+
+
+@app.route('/get_puzzle_options', methods=['GET'])
+def get_puzzle_options():
+    global draft_story_save, history
+    try:
+        messages, history = generate_puzzle(draft_story_save, history)
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=messages
+        )
+        answer = response.choices[0].message.content
+        print(response.choices[0].message.content)
+        return jsonify({'options': answer})
+    except Exception as e:
+        print(f"General error: {e}")
+        return jsonify({'error': f"General error: {e}"}), 500
+    
+
+def generate_final_story_prompt(reask, mbti, zodiac, draft_story_save, history):
+    messages = history.copy()
+    messages.append({"role": "assistant", "content": f"tarot predict is above"})
+    messages.append(
+        {"role": "user", "content": f"According to the mbti of tester is {mbti} and the zodiac {zodiac}, resolving this questiongs: {reask} in 200-words. Translate all to Chinese."}
+    )
+    print(messages)
+    return messages
+
+
+@app.route('/generate_final_story', methods=['POST'])
+def generate_final_story():
+    global draft_story_save, history
+    finalData = request.get_json()
+    reask = finalData['puzzles']
+    selfConfig = finalData['selfAnswers']
+    mbti = selfConfig.get('section1')
+    zodiac = selfConfig.get('section2')
+    print(finalData)
+    # mbti = data.get('section1')
+    # constellation = data.get('section2')
+    try:
+        messages = generate_final_story_prompt(reask, mbti, zodiac, draft_story_save, history)
+        print(messages)
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=messages
+        )
+        answer = response.choices[0].message.content
+        print(response.choices[0].message.content)
+        return jsonify({'story': answer})
     except Exception as e:
         print(f"General error: {e}")
         return jsonify({'error': f"General error: {e}"}), 500
