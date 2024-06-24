@@ -167,6 +167,8 @@ function regenerateOptions(section) {
 async function submitForm() {
     console.log(JSON.stringify(answers));
     
+    const responseImgDiv = document.getElementById('images');
+    responseImgDiv.style.removeProperty('display');
     const responseDiv = document.getElementById('response');
     responseDiv.style.removeProperty('display');
     responseDiv.innerHTML = 'Loading...';
@@ -180,12 +182,31 @@ async function submitForm() {
             body: JSON.stringify(answers)
         });
         const data = await response.json();
+        cards = data.cards;
+        posis = data.posis;
         responseDiv.innerHTML = "";
         storyTitleDiv = document.createElement('div');
         storyTitleDiv.className = 'question fs-4';
         storyTitleDiv.textContent = "Tarot shows...";
         responseDiv.appendChild(storyTitleDiv);
 
+        const imagesContainer = document.createElement('div');
+        imagesContainer.className = 'images-container'; // 可以通过CSS设置样式
+        imagesContainer.style.display = 'flex'; // 使用Flexbox布局
+        imagesContainer.style.flexWrap = 'wrap'; // 如果需要的话，允许换行
+        for (let i = 0; i < 8; i++) {
+            const imgElement = document.createElement('img');
+            imgElement.src = `/static/tarot_img/${cards[i]}.png`; // 替换为您的图片文件名格式
+            imgElement.alt = `Tarot ${i}`; // 添加alt属性以提供图像描述
+            if (posis[i] === 'reversed') {
+                imgElement.style.transform = 'scaleY(-1)'; // 水平翻转图像
+            }
+            imgElement.style.width = '120px'; // 根据需要设置
+            imgElement.style.margin = '10px 5px'; // 根据需要设置
+            imagesContainer.appendChild(imgElement);
+        }
+        responseImgDiv.appendChild(imagesContainer);
+        
         storyDiv = document.createElement('div');
         storyDiv.className = 'text-start';
         storyDiv.textContent = data.answer;

@@ -20,22 +20,22 @@ draft_story_save = ""
 puzzles = ""
 final_story = ""
 
-card_set = ["Fool", "Magician", "High Priestess", "Empress", "Emperor", "Hierophant", "Lovers", "Chariot", "Hermit", "Wheel of Fortune", "Justice", "Hanged Man", "Death", "Temperance", "Devil", "Tower", "Star", "Moon", "Sun", "Judgment", "World", 
-            "Ace of Wands", "Two of Wands", "Three of Wands", "Four of Wands", "Five of Wands", "Six of Wands", "Seven of Wands", "Eight of Wands", "Nine of Wands", "Ten of Wands", 
-            "Page of Wands", "Queen of Wands", "King of Wands", 
-            "Ace of Cups", "Two of Cups", "Three of Cups", "Four of Cups", "Five of Cups", "Six of Cups", "Seven of Cups", "Eight of Cups", "Nine of Cups", "Ten of Cups", 
-            "Page of Cups", "Queen of Cups", "King of Cups", 
-            "Ace of Swords", "Two of Swords", "Three of Swords", "Four of Swords", "Five of Swords", "Six of Swords", "Seven of Swords", "Eight of Swords", "Nine of Swords", "Ten of Swords", 
-            "Page of Swords", "Queen of Swords", "King of Swords", 
-            "Ace of Pentacles", "Two of Pentacles", "Three of Pentacles", "Four of Pentacles", "Five of Pentacles", "Six of Pentacles", "Seven of Pentacles", "Eight of Pentacles", "Nine of Pentacles", "Ten of Pentacles", 
-            "Page of Pentacles", "Queen of Pentacles", "King of Pentacles"
+card_set = ["THE_FOOL", "THE_MAGICIAN", "THE_HIGH_PRIESTESS", "THE_EMPRESS", "THE_EMPEROR", "THE_HIEROPHANT", "THE_LOVERS", "THE_CHARIOT", "STRENGTH", "THE_HERMIT", "WHEEL_OF_FORTUNE", "JUSTICE", "THE_HANGED_MAN", "DEATH", "TEMPERANCE", "THE_DEVIL", "THE_TOWER", "THE_STAR", "THE_MOON", "THE_SUN", "JUDGEMENT", "THE_WORLD", 
+            "ACE_OF_WANDS", "TWO_OF_WANDS", "THREE_OF_WANDS", "FOUR_OF_WANDS", "FIVE_OF_WANDS", "SIX_OF_WANDS", "SEVEN_OF_WANDS", "EIGHT_OF_WANDS", "NINE_OF_WANDS", "TEN_OF_WANDS", 
+            "PAGE_OF_WANDS", "KNIGHT_OF_WANDS", "QUEEN_OF_WANDS", "KING_OF_WANDS", 
+            "ACE_OF_CUPS", "TWO_OF_CUPS", "THREE_OF_CUPS", "FOUR_OF_CUPS", "FIVE_OF_CUPS", "SIX_OF_CUPS", "SEVEN_OF_CUPS", "EIGHT_OF_CUPS", "NINE_OF_CUPS", "TEN_OF_CUPS", 
+            "PAGE_OF_CUPS", "KNIGHT_OF_CUPS", "QUEEN_OF_CUPS", "KING_OF_CUPS", 
+            "ACE_OF_SWORDS", "TWO_OF_SWORDS", "THREE_OF_SWORDS", "FOUR_OF_SWORDS", "FIVE_OF_SWORDS", "SIX_OF_SWORDS", "SEVEN_OF_SWORDS", "EIGHT_OF_SWORDS", "NINE_OF_SWORDS", "TEN_OF_SWORDS", 
+            "PAGE_OF_SWORDS", "KNIGHT_OF_SWORDS", "QUEEN_OF_SWORDS", "KING_OF_SWORDS", 
+            "ACE_OF_PENTACLES", "TWO_OF_PENTACLES", "THREE_OF_PENTACLES", "FOUR_OF_PENTACLES", "FIVE_OF_PENTACLES", "SIX_OF_PENTACLES", "SEVEN_OF_PENTACLES", "EIGHT_OF_PENTACLES", "NINE_OF_PENTACLES", "TEN_OF_PENTACLES", 
+            "PAGE_OF_PENTACLES", "KNIGHT_OF_PENTACLES", "QUEEN_OF_PENTACLES", "KING_OF_PENTACLES", 
             ]
-card_status = ["positive", "negative"]
+card_status = ["upright", "reversed"]
 
 def generate_draft_story_message(aspect_data, input_str):
     history = []
     messages = [
-        {"role": "system", "content": "You're a tarot card prognosticator, and you need to give a 300-word or so prediction of the future through my next hand input, and the consulter usually comes with frustration, and your answers need to sell anxiety. Translate all to Chinese."},
+        {"role": "system", "content": "You're a tarot card prognosticator, and you need to give a 300-word or so prediction of the future through my next hand input, and the consulter usually comes with frustration, and your answers need to sell anxiety."},
         {"role": "user", "content": f"In the aspect of {aspect_data}, cards are {input_str}"}
     ]
     history.append(messages[0])
@@ -67,8 +67,16 @@ def draft_story():
     numbers = list(range(len(card_set) - 1)) 
     random_card_num = random.sample(numbers, card_number)  
     input_str = ""
+    cards=[]
+    posis=[]
     for i in range(card_number):
-        input_str += "Card_" + str(i) + ":" + card_set[random_card_num[i]] + ", status: " + card_status[random.randint(0, 1)] + "; "
+        card = card_set[random_card_num[i]]
+        posi = card_status[random.randint(0, 1)]
+        cards.append(card)
+        posis.append(posi)
+        input_str += "Card_" + str(i) + ":" + card + ", status: " + posi + "; "
+    print(cards)
+    print(posis)
 
     # predict the story
     try:
@@ -81,8 +89,12 @@ def draft_story():
         print(response.choices[0].message)
         draft_story_save = answer
 
-        output = f"Your cards is {input_str}\n{answer}"
-        return jsonify({'answer': output})
+        output = {
+            'cards': cards,
+            'posis': posis,
+            'answer': answer
+        }
+        return jsonify(output)
     except Exception as e:
         print(f"General error: {e}")
         return jsonify({'error': f"General error: {e}"}), 500
@@ -146,7 +158,7 @@ def generate_final_story_prompt(reask, mbti, zodiac, draft_story_save, history):
     messages = history.copy()
     messages.append({"role": "assistant", "content": f"tarot predict is above"})
     messages.append(
-        {"role": "user", "content": f"According to the mbti of tester is {mbti} and the zodiac {zodiac}, resolving this questiongs: {reask} in 200-words. Translate all to Chinese."}
+        {"role": "user", "content": f"According to the mbti of tester is {mbti} and the zodiac {zodiac}, resolving this questiongs: {reask} in 200-words."}
     )
     print(messages)
     return messages
