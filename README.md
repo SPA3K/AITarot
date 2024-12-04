@@ -1,5 +1,5 @@
 # AITarot
-Random tarot cards draw and analyze through GPT-4
+Random tarot cards draw and analyze through GPT-4, all tarot card picture provided!
 
 # env
 $ conda create -n aitarot python=3.10
