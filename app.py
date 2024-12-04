@@ -6,10 +6,8 @@ import os
 import re
 import random
 
-os.environ["OPENAI_API_KEY"] = "sk-proj-uKz845rWEhZjPjFs55WUT3BlbkFJsX1pkp7s9LL9Uz00qj44"   # kehan key
-# os.environ["OPENAI_API_KEY"] = "sk-VbBK9ARkkhKG25Io2783Bd26Ed404788Ad6cC25559E7C005"          # no proxy key
-# os.environ["OPENAI_BASE_URL"] = "https://api.xiaoai.plus/v1"
-os.environ["BACKEND_URL"] = "https://aitarot.azurewebsites.net/"
+os.environ["OPENAI_API_KEY"] = "***"
+os.environ["BACKEND_URL"] = "***"
 
 load_dotenv()
 app = Flask(__name__)
